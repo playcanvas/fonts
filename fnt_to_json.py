@@ -1,6 +1,6 @@
 """
-Script to convert an .fnt (font) file exported from tools like 
-BMFont and Glyph Designer to a .json format which we can use 
+Script to convert an .fnt (font) file exported from tools like
+BMFont and Glyph Designer to a .json format which we can use
 to render fonts at runtime
 """
 import sys
@@ -18,7 +18,7 @@ for name in ['encode_basestring', 'encode_basestring_ascii']:
         return o if isinstance(o, RawJson) else _encode(o)
     setattr(json.encoder, name, encode)
 
-regex = re.compile("([a-zA-Z0-9]+)=(\S+)")
+regex = re.compile("([a-zA-Z0-9]+)=((\"[^\"]*\")|(\S+))")
 
 def line_to_json(line):
     """
@@ -27,7 +27,7 @@ def line_to_json(line):
     result = {}
     expressions = line.strip().split(' ')
     iterator = iter(expressions)
-    next(iterator   )
+    next(iterator)
     for expression in iterator:
         if len(expression) == 0:
             continue
@@ -75,9 +75,9 @@ def main(argv):
         else:
             (name, result) = line_to_json(line)
             output[name] = result
-             
 
-    # Write result 
+
+    # Write result
     with open(argv[1], 'w') as f:
         f.write(json.dumps(output))
 
