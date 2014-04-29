@@ -15,7 +15,7 @@ These tools allow you to convert .ttf or .otf fonts to bitmap fonts. They have v
 a texture that contains all the characters of the font you want to use and an .fnt file that contains metadata for the bitmap font. So in order to create a font:
 - Install the tool of your choice
 - Pick the font you want to use and edit its settings to your liking
-- Export the font. The metadata file should have a .fnt extension
+- Export the font. The metadata file should have an .fnt extension
 - The exported texture must be a .png file. If it's not you can set it to a png in the export settings. Make sure to select a transparent background for the exported texture.
 - If your font contains lots of characters the tool might try to export multiple textures to fit all of the characters. We currently
 only support 1 texture so either select a subset of the characters in that font or select a bigger texture
@@ -40,7 +40,7 @@ Next steps to render our font in the application:
 - Go to your pack and create a new Entity with a Script Component
 - Add *font_renderer.js* to the Script Component
 
-You will see a bunch of attributes for the font renderer. These specify which font to use, what text to render and also the positioning of our text on Screen. Specifically:
+You will see a bunch of attributes for the font renderer. These specify which font to use, what text to render and also the positioning of our text on screen. Specifically:
 - **text**: This is the text that will be rendered.
 - **maxTextLength**: The maximum number of characters that this font renderer will ever render.
 - **fontAtlas**: Set this to the font texture that you uploaded before.
