@@ -1,4 +1,4 @@
-Rendering bitmap fonts in PlayCanvas
+Overview
 ====================================
 
 This repository contains scripts that allow you to render bitmap fonts using PlayCanvas.
