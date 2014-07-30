@@ -1,4 +1,4 @@
-/** 
+/**
  * Attributes
  */
 
@@ -6,7 +6,7 @@ pc.script.attribute('text', 'string');
 // the maximum length of the text - used to set the initial size of the vertex buffer
 pc.script.attribute('maxTextLength', 'number', 256);
 
-// The texture atlas that contains all the letters - this has to be 
+// The texture atlas that contains all the letters - this has to be
 // a png file with alpha
 pc.script.attribute('fontAtlas', 'asset', [], {
     type: 'texture',
@@ -90,8 +90,8 @@ pc.script.attribute('tint', 'rgba', [1,1,1,1]);
 pc.script.attribute('maxResHeight', 'number', 720);
 
 pc.script.create('font_renderer', function (context) {
-    
-    var shader = null;    
+
+    var shader = null;
     var vertexFormat = null;
     var resolution = new pc.Vec2();
 
@@ -101,7 +101,7 @@ pc.script.create('font_renderer', function (context) {
     };
 
     Font_renderer.prototype = {
-        initialize: function () { 
+        initialize: function () {
             var canvas = document.getElementById('application-canvas');
 
             this.userOffset = new pc.Vec2();
@@ -130,7 +130,7 @@ pc.script.create('font_renderer', function (context) {
                         "uniform vec2 uScale;",
                         "",
                         "void main(void)",
-                        "{",                            
+                        "{",
                         "    gl_Position = vec4(2.0 * ((uScale * aPosition.xy + uOffset) / uResolution ) - 1.0, -0.9, 1.0);",
                         "    vUv0 = aUv0;",
                         "}"
@@ -151,11 +151,11 @@ pc.script.create('font_renderer', function (context) {
                         "}"
                     ].join("\n")
                 };
-        
+
                 shader = new pc.gfx.Shader(gd, shaderDefinition);
             }
-            
-    
+
+
             // Create the vertex format
             if (!vertexFormat) {
                 vertexFormat = new pc.gfx.VertexFormat(gd, [
@@ -178,9 +178,9 @@ pc.script.create('font_renderer', function (context) {
                 // Create a vertex buffer
                 this.vertexBuffer = new pc.gfx.VertexBuffer(gd, vertexFormat, 6*this.maxTextLength, pc.gfx.BUFFER_DYNAMIC);
                 this.updateText(this.text);
-    
+
                 var command = new pc.scene.Command(pc.scene.LAYER_HUD, pc.scene.BLEND_NORMAL, function () {
-                    if (this.entity.enabled) {  
+                    if (this.entity.enabled) {
                         // Set the shader
                         gd.setShader(shader);
 
@@ -195,7 +195,7 @@ pc.script.create('font_renderer', function (context) {
                         gd.scope.resolve("uOffset").setValue(this.calculateOffset().data);
                         gd.scope.resolve("uColorMap").setValue(this.atlas);
                         gd.scope.resolve("vTint").setValue(this.tint.data);
-                        
+
                         // Set the vertex buffer
                         gd.setVertexBuffer(this.vertexBuffer, 0);
                         gd.draw({
@@ -260,12 +260,12 @@ pc.script.create('font_renderer', function (context) {
             mx = (2.0 * cursor.x / canvas.offsetWidth) - 1;
             my = (2.0 * (canvas.offsetHeight - cursor.y) / canvas.offsetHeight) - 1;
 
-            if (mx >= tlx && mx <= brx && 
+            if (mx >= tlx && mx <= brx &&
                 my <= tly && my >= bry) {
                 this.fire('click');
-            } 
+            }
         },
-        
+
         /**
          * Re-render the text if necessary
          */
@@ -274,22 +274,22 @@ pc.script.create('font_renderer', function (context) {
 
             if (name === 'text' ) {
                 if (oldValue !== newValue) {
-                    this.updateText(); 
-                }   
+                    this.updateText();
+                }
             } else if (name === 'depth') {
                 this.command.key = newValue;
-            } 
+            }
         },
-    
+
         getTotalOffset: function (result) {
             result.copy(this.userOffset).add(this.alignOffset);
             return result;
         },
-        
+
         updateText: function () {
             // Fill the vertex buffer
             this.vertexBuffer.lock();
-        
+
             // the cursor controls the position of the next character to be drawn
             var cursorX = 0;
             var cursorY = 0;
@@ -302,6 +302,7 @@ pc.script.create('font_renderer', function (context) {
             var kerning = 0;
             var text = this.text;
             var textLength = text.length;
+            var i;
 
             this.width = 0;
             this.height = 0;
@@ -310,7 +311,7 @@ pc.script.create('font_renderer', function (context) {
             for (i = 0; i < textLength; i++) {
                 var charId = text.charCodeAt(i);
                 var fontChar = this.font.chars[charId];
-               
+
                 // Get the uv's for our letter - these will be looked up in the texture atlas
                 uv0 = fontChar.x / this.font.common.scaleW;
                 uv1 = 1 - (fontChar.y + fontChar.height) / (this.font.common.scaleH);
@@ -320,14 +321,14 @@ pc.script.create('font_renderer', function (context) {
                 var height = fontChar.height;
                 var xoffset = fontChar.xoffset;
                 var yoffset = fontChar.yoffset;
-                
+
                 // offset the cursor by the appropriate amount for each letter
                 tempCursorX = cursorX + xoffset;
                 tempCursorY = cursorY - yoffset;
 
                 this.width = Math.max(this.width, tempCursorX + width);
                 this.height = Math.max(this.height, tempCursorY + height);
-                
+
                 // Add vertices
                 iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX, tempCursorY - height);
                 iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv0, uv1);
@@ -346,7 +347,7 @@ pc.script.create('font_renderer', function (context) {
                 iterator.next();
                 iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX, tempCursorY);
                 iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv0, uv3);
-                
+
                 if (i == textLength - 1) {
                     iterator.end();
                 } else {
@@ -354,16 +355,16 @@ pc.script.create('font_renderer', function (context) {
 
                     var nextId = text.charCodeAt(i+1);
 
-                    kerning = this.font.kernings[charId] && this.font.kernings[charId][nextId] ? 
+                    kerning = this.font.kernings[charId] && this.font.kernings[charId][nextId] ?
                               this.font.kernings[charId][nextId] :
                               0;
-                    
+
                    // Advance the cursor by xadvance adding kerning if necessary for the current character pair
                     cursorX += (fontChar.xadvance + kerning);
                 }
             }
             this.vertexBuffer.unlock();
-        }, 
+        },
 
         calculateOffset: function () {
             var canvas = context.graphicsDevice.canvas;
@@ -428,7 +429,7 @@ pc.script.create('font_renderer', function (context) {
                 case 8:
                     this.anchorOffset.set(width, -height);
                     break;
-                default: 
+                default:
                     console.error('Wrong anchor: ' + this.anchor);
                     break;
             }
@@ -477,14 +478,14 @@ pc.script.create('font_renderer', function (context) {
                 case 8:
                     this.pivotOffset.set(-width, height);
                     break;
-                default: 
+                default:
                     console.error('Wrong pivot: ' + this.pivot);
                     break;
             }
 
             return this.pivotOffset;
         },
-        
+
         onEnable: function () {
             this.eventsEnabled = false;
         },
