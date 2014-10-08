@@ -167,8 +167,8 @@ pc.script.create('font_renderer', function (context) {
 
             // Load font assets
             var assets = [
-                context.assets.getAssetByResourceId(this.fontAtlas),
-                context.assets.getAssetByResourceId(this.fontJson),
+                context.assets.getAssetById(this.fontAtlas),
+                context.assets.getAssetById(this.fontJson),
             ];
 
             context.assets.load(assets).then(function (resources) {
@@ -184,9 +184,14 @@ pc.script.create('font_renderer', function (context) {
                         // Set the shader
                         gd.setShader(shader);
 
+                        var oldBlending = gd.getBlending();
+                        var oldDepthTest = gd.getDepthTest();
+                        var oldDepthWrite = gd.getDepthWrite();
                         gd.setBlending(true);
-                        gd.setBlendFunction(pc.gfx.BLENDMODE_SRC_ALPHA, pc.gfx.BLENDMODE_ONE_MINUS_SRC_ALPHA);
+                        gd.setDepthTest(false);
                         gd.setDepthWrite(false);
+
+                        gd.setBlendFunction(pc.gfx.BLENDMODE_SRC_ALPHA, pc.gfx.BLENDMODE_ONE_MINUS_SRC_ALPHA);
 
                         resolution.set(canvas.offsetWidth, canvas.offsetHeight);
 
@@ -201,9 +206,13 @@ pc.script.create('font_renderer', function (context) {
                         gd.draw({
                             type: pc.gfx.PRIMITIVE_TRIANGLES,
                             base: 0,
-                            count: this.text.length*6,
+                            count: this.text.length * 6,
                             indexed: false
                         });
+
+                        gd.setBlending(oldBlending);
+                        gd.setDepthTest(oldDepthTest);
+                        gd.setDepthWrite(oldDepthWrite);
                     }
                 }.bind(this));
 
