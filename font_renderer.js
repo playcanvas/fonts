@@ -259,12 +259,15 @@ pc.script.create('font_renderer', function (context) {
             var scaling = this.scaling;
             var offset = this.offset;
 
+            var width = this.width;
+            var height = this.height;
+
             tlx = 2.0 * (scaling.x * 0 + offset.x) / resolution.x - 1.0;
             tly = 2.0 * (scaling.y * 0 + offset.y) / resolution.y - 1.0;
 
 
-            brx = 2.0 * (scaling.x * this.width + offset.x) / resolution.x - 1.0;
-            bry = 2.0 * (scaling.y * (- this.height) + offset.y) / resolution.y - 1.0;
+            brx = 2.0 * (scaling.x * width + offset.x) / resolution.x - 1.0;
+            bry = 2.0 * (scaling.y * (- height) + offset.y) / resolution.y - 1.0;
 
             mx = (2.0 * cursor.x / canvas.offsetWidth) - 1;
             my = (2.0 * (canvas.offsetHeight - cursor.y) / canvas.offsetHeight) - 1;
@@ -333,7 +336,7 @@ pc.script.create('font_renderer', function (context) {
 
                 // offset the cursor by the appropriate amount for each letter
                 tempCursorX = cursorX + xoffset;
-                tempCursorY = cursorY - yoffset;
+                tempCursorY = -yoffset;
 
                 this.width = Math.max(this.width, tempCursorX + width);
                 this.height = Math.max(this.height, tempCursorY + height);
