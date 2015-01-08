@@ -118,8 +118,8 @@ pc.script.create('font_renderer', function (context) {
             if (!shader) {
                 var shaderDefinition = {
                     attributes: {
-                        aPosition: pc.gfx.SEMANTIC_POSITION,
-                        aUv0: pc.gfx.SEMANTIC_TEXCOORD0
+                        aPosition: pc.SEMANTIC_POSITION,
+                        aUv0: pc.SEMANTIC_TEXCOORD0
                     },
                     vshader: [
                         "attribute vec2 aPosition;",
@@ -152,15 +152,15 @@ pc.script.create('font_renderer', function (context) {
                     ].join("\n")
                 };
 
-                shader = new pc.gfx.Shader(gd, shaderDefinition);
+                shader = new pc.Shader(gd, shaderDefinition);
             }
 
 
             // Create the vertex format
             if (!vertexFormat) {
-                vertexFormat = new pc.gfx.VertexFormat(gd, [
-                    { semantic: pc.gfx.SEMANTIC_POSITION, components: 2, type: pc.gfx.ELEMENTTYPE_FLOAT32 },
-                    { semantic: pc.gfx.SEMANTIC_TEXCOORD0, components: 2, type: pc.gfx.ELEMENTTYPE_FLOAT32 }
+                vertexFormat = new pc.VertexFormat(gd, [
+                    { semantic: pc.SEMANTIC_POSITION, components: 2, type: pc.ELEMENTTYPE_FLOAT32 },
+                    { semantic: pc.SEMANTIC_TEXCOORD0, components: 2, type: pc.ELEMENTTYPE_FLOAT32 }
                 ]);
             }
 
@@ -176,10 +176,10 @@ pc.script.create('font_renderer', function (context) {
                 this.font = resources[1];
 
                 // Create a vertex buffer
-                this.vertexBuffer = new pc.gfx.VertexBuffer(gd, vertexFormat, 6*this.maxTextLength, pc.gfx.BUFFER_DYNAMIC);
+                this.vertexBuffer = new pc.VertexBuffer(gd, vertexFormat, 6*this.maxTextLength, pc.BUFFER_DYNAMIC);
                 this.updateText(this.text);
 
-                var command = new pc.scene.Command(pc.scene.LAYER_HUD, pc.scene.BLEND_NORMAL, function () {
+                var command = new pc.Command(pc.LAYER_HUD, pc.BLEND_NORMAL, function () {
                     if (this.entity.enabled) {
                         // Set the shader
                         gd.setShader(shader);
@@ -191,7 +191,7 @@ pc.script.create('font_renderer', function (context) {
                         gd.setDepthTest(false);
                         gd.setDepthWrite(false);
 
-                        gd.setBlendFunction(pc.gfx.BLENDMODE_SRC_ALPHA, pc.gfx.BLENDMODE_ONE_MINUS_SRC_ALPHA);
+                        gd.setBlendFunction(pc.BLENDMODE_SRC_ALPHA, pc.BLENDMODE_ONE_MINUS_SRC_ALPHA);
 
                         resolution.set(canvas.offsetWidth, canvas.offsetHeight);
 
@@ -204,7 +204,7 @@ pc.script.create('font_renderer', function (context) {
                         // Set the vertex buffer
                         gd.setVertexBuffer(this.vertexBuffer, 0);
                         gd.draw({
-                            type: pc.gfx.PRIMITIVE_TRIANGLES,
+                            type: pc.PRIMITIVE_TRIANGLES,
                             base: 0,
                             count: this.text.length * 6,
                             indexed: false
@@ -319,7 +319,7 @@ pc.script.create('font_renderer', function (context) {
             this.width = 0;
             this.height = 0;
 
-            var iterator = new pc.gfx.VertexIterator(this.vertexBuffer);
+            var iterator = new pc.VertexIterator(this.vertexBuffer);
             for (i = 0; i < textLength; i++) {
                 var charId = text.charCodeAt(i);
                 var fontChar = this.font.chars[charId];
@@ -342,23 +342,23 @@ pc.script.create('font_renderer', function (context) {
                 this.height = Math.max(this.height, tempCursorY + height);
 
                 // Add vertices
-                iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX, tempCursorY - height);
-                iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv0, uv1);
+                iterator.element[pc.SEMANTIC_POSITION].set(tempCursorX, tempCursorY - height);
+                iterator.element[pc.SEMANTIC_TEXCOORD0].set(uv0, uv1);
                 iterator.next();
-                iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX + width, tempCursorY - height);
-                iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv2, uv1);
+                iterator.element[pc.SEMANTIC_POSITION].set(tempCursorX + width, tempCursorY - height);
+                iterator.element[pc.SEMANTIC_TEXCOORD0].set(uv2, uv1);
                 iterator.next();
-                iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX, tempCursorY);
-                iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv0, uv3);
+                iterator.element[pc.SEMANTIC_POSITION].set(tempCursorX, tempCursorY);
+                iterator.element[pc.SEMANTIC_TEXCOORD0].set(uv0, uv3);
                 iterator.next();
-                iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX + width, tempCursorY - height);
-                iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv2, uv1);
+                iterator.element[pc.SEMANTIC_POSITION].set(tempCursorX + width, tempCursorY - height);
+                iterator.element[pc.SEMANTIC_TEXCOORD0].set(uv2, uv1);
                 iterator.next();
-                iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX + width, tempCursorY);
-                iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv2, uv3);
+                iterator.element[pc.SEMANTIC_POSITION].set(tempCursorX + width, tempCursorY);
+                iterator.element[pc.SEMANTIC_TEXCOORD0].set(uv2, uv3);
                 iterator.next();
-                iterator.element[pc.gfx.SEMANTIC_POSITION].set(tempCursorX, tempCursorY);
-                iterator.element[pc.gfx.SEMANTIC_TEXCOORD0].set(uv0, uv3);
+                iterator.element[pc.SEMANTIC_POSITION].set(tempCursorX, tempCursorY);
+                iterator.element[pc.SEMANTIC_TEXCOORD0].set(uv0, uv3);
 
                 if (i == textLength - 1) {
                     iterator.end();
