@@ -166,14 +166,9 @@ pc.script.create('font_renderer', function (app) {
 
 
             // Load font assets
-            var assets = [
-                app.assets.getAssetById(this.fontAtlas),
-                app.assets.getAssetById(this.fontJson),
-            ];
-
-            app.assets.load(assets).then(function (resources) {
-                this.atlas = resources[0];
-                this.font = resources[1];
+            var done = function () {
+                this.atlas = assets[0].resource;
+                this.font = assets[1].resource;
 
                 // Create a vertex buffer
                 this.vertexBuffer = new pc.VertexBuffer(gd, vertexFormat, 6*this.maxTextLength, pc.BUFFER_DYNAMIC);
@@ -221,8 +216,22 @@ pc.script.create('font_renderer', function (app) {
                 app.scene.drawCalls.push(command);
 
                 this.on('set', this.onAttributeChanged, this);
+            }.bind(this);
 
-            }.bind(this));
+            var assets = [
+                app.assets.get(this.fontAtlas),
+                app.assets.get(this.fontJson),
+            ];
+            var count = 0;
+            for(var i = 0; i < assets.length; i++) {
+                assets[i].ready(function (asset) {
+                    count++;
+                    if (count === assets.length) {
+                        done();
+                    }
+                });
+                app.assets.load(assets[i]);
+            }
 
             app.mouse.on('mousedown', this.onMouseDown, this);
             if (app.touch) {
