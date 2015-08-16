@@ -21,7 +21,7 @@ pc.script.attribute('fontJson', 'asset', [], {
 
 pc.script.attribute('x', 'number');
 pc.script.attribute('y', 'number');
-pc.script.attribute('depth', 'number', 1)
+pc.script.attribute('depth', 'number', 1);
 
 pc.script.attribute('anchor', 'enumeration', 0, {
     enumerations: [{
@@ -220,7 +220,7 @@ pc.script.create('font_renderer', function (app) {
 
             var assets = [
                 app.assets.get(this.fontAtlas),
-                app.assets.get(this.fontJson),
+                app.assets.get(this.fontJson)
             ];
             var count = 0;
             for(var i = 0; i < assets.length; i++) {
@@ -332,6 +332,8 @@ pc.script.create('font_renderer', function (app) {
             for (i = 0; i < textLength; i++) {
                 var charId = text.charCodeAt(i);
                 var fontChar = this.font.chars[charId];
+                // Check we have the requested character
+                if (fontChar === undefined) continue;
 
                 // Get the uv's for our letter - these will be looked up in the texture atlas
                 uv0 = fontChar.x / this.font.common.scaleW;
