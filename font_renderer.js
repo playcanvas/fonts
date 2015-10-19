@@ -19,6 +19,7 @@ pc.script.attribute('fontJson', 'asset', [], {
     max: 1
 });
 
+pc.script.attribute('eventsEnabled', 'boolean', true);
 pc.script.attribute('x', 'number');
 pc.script.attribute('y', 'number');
 pc.script.attribute('depth', 'number', 1);
@@ -90,7 +91,7 @@ pc.script.attribute('tint', 'rgba', [1,1,1,1]);
 pc.script.attribute('maxResHeight', 'number', 720);
 
 pc.script.create('font_renderer', function (app) {
-
+    var eventsEnabledBackup;
     var shader = null;
     var vertexFormat = null;
     var resolution = new pc.Vec2();
@@ -510,15 +511,13 @@ pc.script.create('font_renderer', function (app) {
         },
 
         onEnable: function () {
-            this.eventsEnabled = false;
+            eventsEnabledBackup = eventsEnabledBackup || this.eventsEnabled;
+            this.eventsEnabled = eventsEnabledBackup;
         },
 
         onDisable: function () {
+            eventsEnabledBackup = this.eventsEnabled;
             this.eventsEnabled = false;
-        },
-
-        update: function (dt) {
-            this.eventsEnabled = true;
         },
 
         destroy: function () {

@@ -45,6 +45,7 @@ You will see a bunch of attributes for the font renderer. These specify which fo
 - **maxTextLength**: The maximum number of characters that this font renderer will ever render.
 - **fontAtlas**: Set this to the font texture that you uploaded before.
 - **fontJson**: Set this to the .json file that you uploaded before.
+- **eventsEnabled**: This is the toggle to allow events when interacting with the text.
 - **x**: This is the x **screen** position of the rendered text.
 - **y**: This is the y **screen** position of the rendered text.
 - **depth**: This is the z-index of the rendered text. If you want this text to appear behind other text or sprites, increase this value.
