@@ -234,36 +234,66 @@ pc.script.create('font_renderer', function (app) {
             }
 
             app.mouse.on('mousedown', this.onMouseDown, this);
+            app.mouse.on('mouseup', this.onMouseUp, this);
             if (app.touch) {
-                app.touch.on('touchstart', this.onTouchDown, this);
+                app.touch.on('touchstart', this.onTouchStart, this);
+                app.touch.on('touchend', this.onTouchEnd, this);
             }
         },
-
 
         onMouseDown: function (e) {
             if (!this.eventsEnabled) {
                 return;
             }
-
-            this.onClick(e);
+            
+            this.clickReady = this.insideRect(e);
+            if (this.clickReady) {
+                this.fire('down');
+            }
         },
-
-        onTouchDown: function (e)   {
+        
+        onMouseUp: function (e) {
             if (!this.eventsEnabled) {
                 return;
             }
+            
+            if(this.clickReady) {
+                this.onClick(e);
+            }
+            this.clickReady = false;
+            this.fire('up');
+        },
 
-            this.onClick(e.changedTouches[0]);
+        onTouchStart: function (e) {
+            if (!this.eventsEnabled) {
+                return;
+            }
+            
+            this.clickReady = this.insideRect(e.changedTouches[0]);
+            if (this.clickReady) {
+                this.fire('down');
+            }
+        },
+        
+        onTouchEnd: function (e) {
+            if (!this.eventsEnabled) {
+                return;
+            }
+            
+            if(this.clickReady) {
+                this.onClick(e.changedTouches[0]);
+            }
+            this.clickReady = false;
+            this.fire('up');
         },
 
         /**
          * Calculates if the click has happened inside the rect of this
-         * sprite and fires 'click' event if it has
+         * text
          */
-        onClick: function (cursor) {
+        insideRect: function(cursor) {
             var canvas = app.graphicsDevice.canvas;
             var tlx, tly, brx, bry, mx, my;
-
 
             var scaling = this.scaling;
             var offset = this.offset;
@@ -274,7 +304,6 @@ pc.script.create('font_renderer', function (app) {
             tlx = 2.0 * (scaling.x * 0 + offset.x) / resolution.x - 1.0;
             tly = 2.0 * (scaling.y * 0 + offset.y) / resolution.y - 1.0;
 
-
             brx = 2.0 * (scaling.x * width + offset.x) / resolution.x - 1.0;
             bry = 2.0 * (scaling.y * (- height) + offset.y) / resolution.y - 1.0;
 
@@ -283,10 +312,20 @@ pc.script.create('font_renderer', function (app) {
 
             if (mx >= tlx && mx <= brx &&
                 my <= tly && my >= bry) {
+                return true;
+            }
+            return false;
+        },
+        
+        /**
+         *  Fires 'click' event if the click took place inside the text's rect
+         */
+        onClick: function (cursor) {
+            if (this.insideRect(cursor)) {
                 this.fire('click');
             }
         },
-
+        
         /**
          * Re-render the text if necessary
          */
