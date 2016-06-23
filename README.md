@@ -36,9 +36,9 @@ Rendering the font
 
 Next steps to render our font in the application:
 - Upload the font texture that we exported from our tool of choice and the new .json file to PlayCanvas.
-- Copy the *font_renderer.js* script in your project.
+- Upload the *font_renderer.js* script in your project.
 - Go to your pack and create a new Entity with a Script Component
-- Add *font_renderer.js* to the Script Component
+- Add *fontRenderer* to the Script Component
 
 You will see a bunch of attributes for the font renderer. These specify which font to use, what text to render and also the positioning of our text on screen. Specifically:
 - **text**: This is the text that will be rendered.
@@ -62,29 +62,13 @@ If you want the rendered text to be clickable you can register an event handler 
 script on the same Entity as the font_renderer:
 
 ```
-pc.script.create('myhandler', function (context) {
-    var Myhandler = function (entity) {
-        this.entity = entity;
-    };
+var MyScript = pc.createScript('myScript');
 
-    Myhandler.prototype = {
-        initialize: function () {
-            this.entity.script.font_renderer.on('click', this.onClick, this);
-        },
+MyScript.prototype.initialize = function() {
+    this.entity.script.fontRenderer.on('click', this.onClick, this);
+};
 
-        onClick: function () {
-            console.log('Click');
-        }
-    };
-
-    return MyHandler;
-});
+MyScript.prototype.onClick = function() {
+    console.log('click!');
+};
 ```
-
-
-
-
-
-
-
-
