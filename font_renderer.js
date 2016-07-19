@@ -235,7 +235,7 @@ FontRenderer.prototype.onMouseDown = function (e) {
     this.onClick(e);
 };
 
-FontRenderer.prototype.onTouchDown - function (e)   {
+FontRenderer.prototype.onTouchDown = function (e)   {
     if (!this.eventsEnabled)
         return;
 
