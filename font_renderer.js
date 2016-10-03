@@ -88,7 +88,7 @@ FontRenderer.attributes.add('maxResHeight', {
     type: 'number',
     default: 720,
     description: 'The maximum resolution height of the application. Used to scale the font accordingly.'
-})
+});
 
 
 /**
@@ -363,7 +363,7 @@ FontRenderer.prototype.updateText = function () {
 
             var kerning = 0;
             if (this.font.kernings[charId] && this.font.kernings[charId][nextId])
-                kerning = this.font.kernings[charId][nextId]
+                kerning = this.font.kernings[charId][nextId];
 
             // Advance the cursor by xadvance adding kerning if necessary for the current character pair
             cursorX += (fontChar.xadvance + kerning);
@@ -384,7 +384,7 @@ FontRenderer.prototype.calculateOffset = function () {
 
     this.offset.y += canvas.offsetHeight;
     return this.offset;
-},
+};
 
 FontRenderer.prototype.calculateScaling = function () {
     var canvas = this.app.graphicsDevice.canvas;
@@ -441,7 +441,7 @@ FontRenderer.prototype.calculateAnchorOffset = function () {
     }
 
     return this.anchorOffset;
-},
+};
 
 FontRenderer.prototype.calculatePivotOffset = function () {
     var width = this.width * this.scaling.x;
