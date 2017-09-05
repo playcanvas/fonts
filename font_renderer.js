@@ -389,7 +389,8 @@ FontRenderer.prototype.calculateOffset = function () {
 FontRenderer.prototype.calculateScaling = function () {
     var canvas = this.app.graphicsDevice.canvas;
     var scale = canvas.offsetHeight / this.maxResHeight;
-    this.scaling.set(scale, scale);
+    var s = this.entity.getLocalScale();
+    this.scaling.set(scale * s.x, scale * s.y);
     return this.scaling;
 };
 
