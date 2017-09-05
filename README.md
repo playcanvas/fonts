@@ -1,3 +1,9 @@
+# DEPRECATED
+
+**This library is no longer supported. We recommend using the [Element Component](https://developer.playcanvas.com/en/user-manual/user-interface/) to render text in PlayCanvas**
+
+---
+
 Overview
 ====================================
 
