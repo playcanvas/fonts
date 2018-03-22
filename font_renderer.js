@@ -94,7 +94,7 @@ FontRenderer.attributes.add('maxResHeight', {
 /**
  * Static variables
  */
-FontRenderer.shader = null;
+FontRenderer.material = null;
 FontRenderer.vertexFormat = null;
 FontRenderer.resolution = new pc.Vec2();
 
@@ -113,10 +113,10 @@ FontRenderer.prototype.initialize = function() {
 
     var app = this.app;
 
-    // Create shader
+    // Create shader and material
     var gd = app.graphicsDevice;
 
-    if (!FontRenderer.shader) {
+    if (!FontRenderer.material) {
         var shaderDefinition = {
             attributes: {
                 aPosition: pc.SEMANTIC_POSITION,
@@ -153,7 +153,16 @@ FontRenderer.prototype.initialize = function() {
             ].join("\n")
         };
 
-        FontRenderer.shader = new pc.Shader(gd, shaderDefinition);
+        var shader = new pc.Shader(gd, shaderDefinition);
+
+        var material = new pc.Material();
+        material.shader = shader;
+        material.blend = true;
+        material.blendSrc = pc.BLENDMODE_SRC_ALPHA;
+        material.blendDst = pc.BLENDMODE_ONE_MINUS_SRC_ALPHA;
+        material.depthTest = false;
+        material.depthWrite = false;
+        FontRenderer.material = material;
     }
 
 
@@ -171,50 +180,65 @@ FontRenderer.prototype.initialize = function() {
     this.atlas = this.fontAtlas.resource;
     this.font = this.fontJson.resource;
 
-    // Create a vertex buffer
-    this.vertexBuffer = new pc.VertexBuffer(gd, FontRenderer.vertexFormat, 6*this.maxTextLength, pc.BUFFER_DYNAMIC);
+    // Create mesh
+    var mesh = new pc.Mesh();
+    mesh.vertexBuffer = new pc.VertexBuffer(gd, FontRenderer.vertexFormat, 6 * this.maxTextLength, pc.BUFFER_DYNAMIC);
+    mesh.primitive[0].type = pc.PRIMITIVE_TRIANGLES;
+    mesh.primitive[0].base = 0;
+    mesh.primitive[0].count = 6 * this.maxTextLength;
+    mesh.primitive[0].indexed = false;
+
+    // Create mesh instance
+    this.meshInstance = new pc.MeshInstance(this.entity, mesh, FontRenderer.material);
+    this.meshInstance.castShadow = false;
+    this.meshInstance.receiveShadow = false;
+    this.meshInstance.drawOrder = this.depth;
+
     this.updateText(this.text);
 
-    var command = new pc.Command(pc.LAYER_HUD, pc.BLEND_NORMAL, function () {
-        if (this.entity.enabled) {
-            // Set the shader
-            gd.setShader(FontRenderer.shader);
+    // Get layer
+    this.layer = app.scene.layers.getLayerById(pc.LAYERID_UI) || app.scene.layers.getLayerById(pc.LAYERID_WORLD);
 
-            var oldBlending = gd.getBlending();
-            var oldDepthTest = gd.getDepthTest();
-            var oldDepthWrite = gd.getDepthWrite();
-            gd.setBlending(true);
-            gd.setDepthTest(false);
-            gd.setDepthWrite(false);
+    // var command = new pc.Command(pc.LAYER_HUD, pc.BLEND_NORMAL, function () {
+    //     if (this.entity.enabled) {
+    //         // Set the shader
+    //         gd.setShader(FontRenderer.shader);
 
-            gd.setBlendFunction(pc.BLENDMODE_SRC_ALPHA, pc.BLENDMODE_ONE_MINUS_SRC_ALPHA);
+    //         var oldBlending = gd.getBlending();
+    //         var oldDepthTest = gd.getDepthTest();
+    //         var oldDepthWrite = gd.getDepthWrite();
+    //         gd.setBlending(true);
+    //         gd.setDepthTest(false);
+    //         gd.setDepthWrite(false);
 
-            FontRenderer.resolution.set(canvas.offsetWidth, canvas.offsetHeight);
+    //         gd.setBlendFunction(pc.BLENDMODE_SRC_ALPHA, pc.BLENDMODE_ONE_MINUS_SRC_ALPHA);
 
-            gd.scope.resolve("uResolution").setValue(FontRenderer.resolution.data);
-            gd.scope.resolve("uScale").setValue(this.calculateScaling().data);
-            gd.scope.resolve("uOffset").setValue(this.calculateOffset().data);
-            gd.scope.resolve("uColorMap").setValue(this.atlas);
-            gd.scope.resolve("vTint").setValue(this.tint.data);
+    //         FontRenderer.resolution.set(canvas.offsetWidth, canvas.offsetHeight);
 
-            // Set the vertex buffer
-            gd.setVertexBuffer(this.vertexBuffer, 0);
-            gd.draw({
-                type: pc.PRIMITIVE_TRIANGLES,
-                base: 0,
-                count: this.text.length * 6,
-                indexed: false
-            });
+    //         gd.scope.resolve("uResolution").setValue(FontRenderer.resolution.data);
+    //         gd.scope.resolve("uScale").setValue(this.calculateScaling().data);
+    //         gd.scope.resolve("uOffset").setValue(this.calculateOffset().data);
+    //         gd.scope.resolve("uColorMap").setValue(this.atlas);
+    //         gd.scope.resolve("vTint").setValue(this.tint.data);
 
-            gd.setBlending(oldBlending);
-            gd.setDepthTest(oldDepthTest);
-            gd.setDepthWrite(oldDepthWrite);
-        }
-    }.bind(this));
+    //         // Set the vertex buffer
+    //         gd.setVertexBuffer(this.vertexBuffer, 0);
+    //         gd.draw({
+    //             type: pc.PRIMITIVE_TRIANGLES,
+    //             base: 0,
+    //             count: this.text.length * 6,
+    //             indexed: false
+    //         });
 
-    this.command = command;
-    command.key = this.depth;
-    app.scene.drawCalls.push(command);
+    //         gd.setBlending(oldBlending);
+    //         gd.setDepthTest(oldDepthTest);
+    //         gd.setDepthWrite(oldDepthWrite);
+    //     }
+    // }.bind(this));
+
+    // this.command = command;
+    // command.key = this.depth;
+    // app.scene.drawCalls.push(command);
 
     this.on('attr', this.onAttributeChanged, this);
     this.on('state', this.onState);
@@ -224,7 +248,7 @@ FontRenderer.prototype.initialize = function() {
     if (app.touch)
         app.touch.on('touchstart', this.onTouchDown, this);
 
-    this.onState();
+    this.onState(true);
 };
 
 
@@ -282,7 +306,7 @@ FontRenderer.prototype.onAttributeChanged = function (name, newValue, oldValue) 
         if (oldValue !== newValue)
             this.updateText();
     } else if (name === 'depth') {
-        this.command.key = newValue;
+        this.meshInstance.drawOrder = newValue;
     }
 };
 
@@ -292,7 +316,8 @@ FontRenderer.prototype.getTotalOffset = function (result) {
 
 FontRenderer.prototype.updateText = function () {
     // Fill the vertex buffer
-    this.vertexBuffer.lock();
+    var vb = this.meshInstance.mesh.vertexBuffer;
+    vb.lock();
 
     // the cursor controls the position of the next character to be drawn
     var cursorX = 0;
@@ -310,7 +335,7 @@ FontRenderer.prototype.updateText = function () {
     this.width = 0;
     this.height = 0;
 
-    var iterator = new pc.VertexIterator(this.vertexBuffer);
+    var iterator = new pc.VertexIterator(vb);
     for (i = 0; i < textLength; i++) {
         var charId = text.charCodeAt(i);
         var fontChar = this.font.chars[charId];
@@ -369,7 +394,9 @@ FontRenderer.prototype.updateText = function () {
             cursorX += (fontChar.xadvance + kerning);
         }
     }
-    this.vertexBuffer.unlock();
+    vb.unlock();
+
+    this.meshInstance.mesh.primitive[0].count = 6 * this.text.length;
 };
 
 FontRenderer.prototype.calculateOffset = function () {
@@ -494,17 +521,32 @@ FontRenderer.prototype.calculatePivotOffset = function () {
 
 FontRenderer.prototype.onState = function (enabled) {
     this.eventsEnabled = false;
+
+    if (this.layer) {
+        if (enabled) {
+            this.layer.addMeshInstances([this.meshInstance]);
+        } else {
+            this.layer.removeMeshInstances([this.meshInstance]);
+        }
+    }
 };
 
 FontRenderer.prototype.update = function (dt) {
     this.eventsEnabled = true;
+
+    var canvas = this.app.graphicsDevice.canvas;
+    FontRenderer.resolution.set(canvas.offsetWidth, canvas.offsetHeight);
+
+    this.meshInstance.setParameter('uResolution', FontRenderer.resolution.data);
+    this.meshInstance.setParameter('uScale', this.calculateScaling().data);
+    this.meshInstance.setParameter('uOffset', this.calculateOffset().data);
+    this.meshInstance.setParameter('uColorMap', this.atlas);
+    this.meshInstance.setParameter('vTint', this.tint.data);
 };
 
 FontRenderer.prototype.onDestroy = function () {
-    // remove draw call
-    if (this.command) {
-        var i = this.app.scene.drawCalls.indexOf(this.command);
-        if (i >= 0)
-            this.app.scene.drawCalls.splice(i, 1);
+    // remove mesh instance
+    if (this.layer) {
+        this.layer.removeMeshInstances([this.meshInstance]);
     }
 };
